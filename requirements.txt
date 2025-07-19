@@ -1,0 +1,15 @@
+Flask
+SQLAlchemy
+Flask-Migrate
+Flask-Login
+Flask-WTF
+Flask-Mail
+python-dotenv
+openai
+stripe
+pandas
+numpy
+pytest
+Flask-Testing
+Werkzeug
+gunicorn
