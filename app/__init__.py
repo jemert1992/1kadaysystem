@@ -1,5 +1,4 @@
 """Flask application initialization with factory pattern."""
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -8,6 +7,9 @@ from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 from config import Config
 import os
+
+# Import root_bp for home route
+from app.routes.root import root_bp
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -51,11 +53,12 @@ def create_app(config_class=Config):
     from app.routes.dashboard import dashboard_bp
     from app.routes.income import income_bp
     from app.routes.api import api_bp
-    
+
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(income_bp, url_prefix='/income')
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(root_bp)  # Register root_bp for home page route
     
     # Error handlers
     @app.errorhandler(404)
