@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Add Income{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Add New Income Entry</h1>
+        <a href="{{ url_for('income.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Income
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Income Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Income Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('income.add') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.date.label(class="form-label") }}
+                                    {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else "")) }}
+                                    {% if form.date.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.date.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.amount.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""), placeholder="0.00") }}
+                                        {% if form.amount.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.amount.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.source.label(class="form-label") }}
+                                    {{ form.source(class="form-control" + (" is-invalid" if form.source.errors else ""), placeholder="e.g., Freelance, Salary, Commission") }}
+                                    {% if form.source.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.source.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.category.label(class="form-label") }}
+                                    {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+                                    {% if form.category.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.category.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="3", placeholder="Optional: Add any additional notes about this income") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-check mb-3">
+                            {{ form.recurring(class="form-check-input") }}
+                            {{ form.recurring.label(class="form-check-label") }}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('income.index') }}" class="btn btn-outline-secondary me-md-2">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Quick Tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning"></i> Quick Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Enter the exact amount you received
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Use clear, descriptive source names
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Add notes for better tracking
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Mark recurring income for automation
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Today's Goal Progress -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-target text-primary"></i> Today's Progress
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ (today_income / 1000 * 100) if today_income else 0 }}%">
+                            {{ "%.1f" | format((today_income / 1000 * 100) if today_income else 0) }}%
+                        </div>
+                    </div>
+                    <h4 class="text-success">${{ today_income or 0 }}</h4>
+                    <small class="text-muted">of $1,000 daily goal</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus on amount field after date is selected
+document.addEventListener('DOMContentLoaded', function() {
+    const dateField = document.querySelector('input[type="date"]');
+    const amountField = document.querySelector('input[name="amount"]');
+    
+    if (dateField && amountField) {
+        dateField.addEventListener('change', function() {
+            if (this.value) {
+                amountField.focus();
+            }
+        });
+    }
+    
+    // Set today's date as default
+    if (dateField && !dateField.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateField.value = today;
+    }
+});
+</script>
+{% endblock %}
