@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - 1K A Day System{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-primary text-white text-center py-5 mb-4">
+    <div class="container">
+        <h1 class="display-4">Welcome to 1K A Day System</h1>
+        <p class="lead">Track your daily income and reach your financial goals</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Quick Links</h2>
+                    <div class="row">
+                        {% if not current_user.is_authenticated %}
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg btn-block">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('main.income') }}" class="btn btn-success btn-lg btn-block">
+                                <i class="fas fa-dollar-sign"></i> Income
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
