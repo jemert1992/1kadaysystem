@@ -12,7 +12,7 @@ class Goal(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    target_amount = db.Column(db.Decimal(10, 2), nullable=False)
+    target_amount = db.Column(db.Numeric(10, 2), nullable=False)
     target_date = db.Column(db.Date, nullable=False, index=True)
     status = db.Column(db.String(20), default='active', nullable=False)
     title = db.Column(db.String(100), nullable=True)
@@ -29,7 +29,7 @@ class Goal(db.Model):
         self.status = status
     
     def __repr__(self):
-        return f'<Goal {self.target_amount} by {self.target_date}>'
+        return f'<Goal ${self.target_amount} by {self.target_date}>'
     
     def to_dict(self):
         return {
