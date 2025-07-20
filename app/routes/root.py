@@ -1,7 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 root_bp = Blueprint('root', __name__)
 
 @root_bp.route('/')
 def home():
-    return "<h1>Welcome to the Home Page</h1>"
+    return render_template('home.html')
