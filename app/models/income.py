@@ -12,7 +12,7 @@ class Income(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    amount = db.Column(db.Decimal(10, 2), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
     source = db.Column(db.String(100), nullable=True)
     description = db.Column(db.Text, nullable=True)
     date = db.Column(db.Date, nullable=False, default=date.today, index=True)
@@ -27,7 +27,7 @@ class Income(db.Model):
         self.date = date if date else date.today()
     
     def __repr__(self):
-        return f'<Income {self.amount} on {self.date}>'
+        return f'<Income ${self.amount} on {self.date}>'
     
     def to_dict(self):
         return {
