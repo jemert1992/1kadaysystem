@@ -53,3 +53,5 @@ def forgot_password():
     
     # TODO: Implement forgot password template
     return render_template('auth/forgot_password.html')
+
+# Authentication blueprint ready for registration with Flask app
