@@ -54,11 +54,13 @@ def create_app(config_class=Config):
     from app.routes.dashboard import dashboard_bp
     from app.routes.income import income_bp
     from app.routes.api import api_bp
+    from app.routes.market_research import market_research_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(income_bp, url_prefix='/income')
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(market_research_bp, url_prefix='/api')
     app.register_blueprint(root_bp)  # Register root_bp for home page route
     
     # Error handlers
