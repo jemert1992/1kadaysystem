@@ -7,6 +7,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 from config import Config
 import os
+from datetime import datetime
 
 # Import root_bp for home route
 from app.routes.root import root_bp
@@ -80,7 +81,8 @@ def create_app(config_class=Config):
         """Inject configuration variables into templates."""
         return {
             'app_name': '1K A Day System',
-            'app_version': '1.0.0'
+            'app_version': '1.0.0',
+            'current_year': datetime.now().year
         }
     
     return app
