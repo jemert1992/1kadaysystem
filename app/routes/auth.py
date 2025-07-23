@@ -4,6 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import db
 from app.models.user import User
+from app.forms.auth import RegistrationForm
 
 # Create authentication blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -49,6 +50,9 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
     
+    # Create RegistrationForm instance
+    form = RegistrationForm()
+    
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip().lower()
@@ -80,7 +84,7 @@ def register():
         if errors:
             for error in errors:
                 flash(error, 'error')
-            return render_template('auth/register.html')
+            return render_template('auth/register.html', form=form)
         
         try:
             # Create new user
@@ -94,9 +98,9 @@ def register():
         except Exception as e:
             db.session.rollback()
             flash('An error occurred during registration. Please try again.', 'error')
-            return render_template('auth/register.html')
+            return render_template('auth/register.html', form=form)
     
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/logout')
 @login_required
