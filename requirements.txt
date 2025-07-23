@@ -13,3 +13,4 @@ pytest
 Flask-Testing
 Werkzeug
 gunicorn
+beautifulsoup4
