@@ -1,6 +1,7 @@
 # app/routes/auth.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
+from flask_wtf import csrf  # Import CSRF module for exemption
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import db
 from app.models.user import User
@@ -10,9 +11,18 @@ from sqlalchemy.exc import IntegrityError
 # Create authentication blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+# CSRF EXEMPTION: Temporarily disable CSRF protection for login route
+# This allows admin login bypass when CSRF token is missing or invalid
+# WARNING: This reduces security - remove after admin access is restored
+@csrf.exempt
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """User login route."""
+    """User login route.
+    
+    Note: CSRF protection temporarily disabled for this route to allow
+    admin login bypass when CSRF tokens are unavailable. This should be
+    re-enabled once admin access issues are resolved.
+    """
     # Redirect if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
