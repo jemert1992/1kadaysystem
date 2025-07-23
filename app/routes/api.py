@@ -1,3 +1,6 @@
+from flask import Blueprint
+api_bp = Blueprint('api', __name__)
+
 # app/routes/api.py
 # ============================================================================
 # INTERNAL API ENDPOINTS (For system integration)
@@ -11,6 +14,7 @@ def internal_sync():
         'message': 'Sync completed successfully',
         'timestamp': datetime.utcnow().isoformat()
     })
+
 @api_bp.route('/internal/maintenance', methods=['POST'])
 @login_required
 def internal_maintenance():
@@ -21,10 +25,10 @@ def internal_maintenance():
         'message': f'Maintenance operation {operation} completed',
         'timestamp': datetime.utcnow().isoformat()
     })
+
 # ============================================================================
 # DIGITAL PRODUCT GENERATION ENDPOINT
 # ============================================================================
-
 # Import required for digital product generation
 from app.utils.digital_product import generate_digital_product
 
@@ -56,6 +60,7 @@ def api_not_found(error):
         'error': 'API endpoint not found',
         'message': 'The requested API endpoint does not exist'
     }), 404
+
 @api_bp.errorhandler(400)
 def api_bad_request(error):
     """Handle 400 errors for API routes."""
@@ -63,12 +68,3 @@ def api_bad_request(error):
         'error': 'Bad request',
         'message': 'The request was invalid or malformed'
     }), 400
-@api_bp.errorhandler(500)
-def api_internal_error(error):
-    """Handle 500 errors for API routes."""
-    logging.error(f'API Internal Error: {error}')
-    return jsonify({
-        'error': 'Internal server error',
-        'message': 'An unexpected error occurred'
-    }), 500
-# API blueprint ready for registration with Flask app
