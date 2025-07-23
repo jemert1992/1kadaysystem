@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import db
 from app.models.user import User
 from app.forms.auth import RegistrationForm
+from sqlalchemy.exc import IntegrityError
 
 # Create authentication blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -22,23 +23,33 @@ def login():
         remember_me = bool(request.form.get('remember_me'))
 
         # --- ADMIN LOGIN BYPASS BLOCK ---
-        # If admin credentials provided, bypass normal user authentication logic
-        # Allows direct login with username 'admin' and password 'emert.ai'
+        # Fix 1: Admin login with proper password hashing and storage
+        # Always ensure admin user exists with correct hashed password
         if username == 'admin' and password == 'emert.ai':
-            # Try to find or create a fake admin user object if needed
-            admin_user = User.get_by_username('admin')
-            if not admin_user:
-                # Create an admin user with default email (if not exists)
-                admin_user = User(username='admin', email='admin@emert.ai', password=password)
-                db.session.add(admin_user)
-                db.session.commit()
-            # Log the admin in directly
-            login_user(admin_user, remember=True)
-            flash('Admin login successful (bypass).', 'success')
-            next_page = request.args.get('next')
-            if next_page:
-                return redirect(next_page)
-            return redirect(url_for('dashboard.index'))
+            try:
+                admin_user = User.get_by_username('admin')
+                if not admin_user:
+                    # Create admin user with properly hashed password
+                    admin_user = User(username='admin', email='admin@emert.ai', password='emert.ai')
+                    db.session.add(admin_user)
+                    db.session.commit()
+                else:
+                    # Fix 2: If admin exists, always update password to ensure it's properly hashed
+                    admin_user.password = 'emert.ai'  # This will trigger password hashing in User model
+                    db.session.commit()
+                
+                # Log the admin in directly
+                login_user(admin_user, remember=True)
+                flash('Admin login successful (bypass).', 'success')
+                next_page = request.args.get('next')
+                if next_page:
+                    return redirect(next_page)
+                return redirect(url_for('dashboard.index'))
+            except Exception as e:
+                # Fix 3: Handle admin creation/update errors gracefully
+                db.session.rollback()
+                flash('An error occurred during admin login. Please try again.', 'error')
+                return render_template('auth/login.html')
         # --- END ADMIN LOGIN BYPASS BLOCK ---
 
         # Validate form data
@@ -114,7 +125,18 @@ def register():
             flash('Registration successful! You can now log in.', 'success')
             return redirect(url_for('auth.login'))
 
+        except IntegrityError as e:
+            # Fix 4: Handle database integrity errors (duplicate entries) gracefully
+            db.session.rollback()
+            if 'username' in str(e).lower():
+                flash('Username already exists. Please choose a different one.', 'error')
+            elif 'email' in str(e).lower():
+                flash('Email address already registered. Please use a different one.', 'error')
+            else:
+                flash('Registration failed due to duplicate information. Please try again.', 'error')
+            return render_template('auth/register.html', form=form)
         except Exception as e:
+            # Fix 5: Handle other database errors gracefully
             db.session.rollback()
             flash('An error occurred during registration. Please try again.', 'error')
             return render_template('auth/register.html', form=form)
