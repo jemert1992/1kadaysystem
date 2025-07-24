@@ -25,7 +25,7 @@ def login():
     """
     # Redirect if user is already logged in
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
+        return redirect(url_for('dashboard.home'))
     
     if request.method == 'POST':
         password = request.form.get('password', '')
@@ -56,7 +56,7 @@ def login():
                 next_page = request.args.get('next')
                 if next_page:
                     return redirect(next_page)
-                return redirect(url_for('dashboard.index'))
+                return redirect(url_for('dashboard.home'))
             except Exception as e:
                 # Handle admin creation/update errors gracefully
                 db.session.rollback()
