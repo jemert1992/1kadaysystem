@@ -39,16 +39,24 @@ def login():
         # Admin-only login: only accept 'emert.ai' password
         if password == 'emert.ai':
             try:
-                admin_user = User.get_by_username('admin')
+                # Try to get existing admin user - fix the method call
+                admin_user = User.query.filter_by(username='admin').first()
+                
                 if not admin_user:
                     # Create admin user with properly hashed password
-                    admin_user = User(username='admin', email='admin@emert.ai', password='emert.ai')
+                    admin_user = User(
+                        username='admin', 
+                        email='admin@emert.ai'
+                    )
+                    # Set password using the setter method which handles hashing
+                    admin_user.set_password('emert.ai')
                     db.session.add(admin_user)
                     db.session.commit()
                 else:
-                    # If admin exists, always update password to ensure it's properly hashed
-                    admin_user.password = 'emert.ai'  # This will trigger password hashing in User model
-                    db.session.commit()
+                    # Verify the password matches - if not, update it
+                    if not admin_user.check_password('emert.ai'):
+                        admin_user.set_password('emert.ai')
+                        db.session.commit()
                 
                 # Log the admin in directly
                 login_user(admin_user, remember=remember_me)
@@ -57,9 +65,12 @@ def login():
                 if next_page:
                     return redirect(next_page)
                 return redirect(url_for('dashboard.home'))
+                
             except Exception as e:
                 # Handle admin creation/update errors gracefully
                 db.session.rollback()
+                # Log the actual error for debugging
+                print(f"Login error: {str(e)}")
                 flash('An error occurred during login. Please try again.', 'error')
                 return render_template('auth/login.html')
         else:
@@ -93,5 +104,3 @@ def inject_auth_urls():
         'logout_url': url_for('auth.logout'),
         'profile_url': url_for('auth.profile')
     }
-
-# Authentication blueprint ready for registration with Flask app
