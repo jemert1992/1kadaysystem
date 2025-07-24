@@ -1,38 +1,21 @@
 {% extends "base.html" %}
-
-{% block title %}Register{% endblock %}
-
+{% block title %}Registration Not Available{% endblock %}
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Register</h3>
+                    <h3 class="text-center">Registration Not Available</h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ url_for('auth.register') }}" method="POST">
-                        {{ form.hidden_tag() }}
-                        <div class="mb-3">
-                            <label class="form-label" for="username">Username</label>
-                            <input class="form-control" id="username" name="username" required="" type="text"/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="email">Email</label>
-                            <input class="form-control" id="email" name="email" required="" type="email"/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="password">Password</label>
-                            <input class="form-control" id="password" name="password" required="" type="password"/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="confirm_password">Confirm Password</label>
-                            <input class="form-control" id="confirm_password" name="confirm_password" required="" type="password"/>
-                        </div>
-                        <div class="d-grid">
-                            <button class="btn btn-primary" type="submit">Register</button>
-                        </div>
-                    </form>
+                    <div class="alert alert-info text-center" role="alert">
+                        <h5>Registration is currently disabled</h5>
+                        <p>New user registration is not available at this time. Please contact your administrator if you need access to this system.</p>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Go to Login</a>
+                    </div>
                     <div class="text-center mt-3">
                         <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
                     </div>
