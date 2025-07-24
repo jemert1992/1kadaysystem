@@ -16,25 +16,26 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 @csrf.exempt
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """User login route.
+    """Password-only login route with admin-only access.
     
-    Note: CSRF protection temporarily disabled for this route to allow
-    admin login bypass when CSRF tokens are unavailable. This should be
-    re-enabled once admin access issues are resolved.
+    Only accepts the password 'emert.ai' for admin access.
+    All username/email logic has been removed.
     """
     # Redirect if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
 
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         remember_me = bool(request.form.get('remember_me'))
 
-        # --- ADMIN LOGIN BYPASS BLOCK ---
-        # Fix 1: Admin login with proper password hashing and storage
-        # Always ensure admin user exists with correct hashed password
-        if username == 'admin' and password == 'emert.ai':
+        # Validate password input
+        if not password:
+            flash('Please provide a password.', 'error')
+            return render_template('auth/login.html')
+
+        # Admin-only login: only accept 'emert.ai' password
+        if password == 'emert.ai':
             try:
                 admin_user = User.get_by_username('admin')
                 if not admin_user:
@@ -43,42 +44,25 @@ def login():
                     db.session.add(admin_user)
                     db.session.commit()
                 else:
-                    # Fix 2: If admin exists, always update password to ensure it's properly hashed
+                    # If admin exists, always update password to ensure it's properly hashed
                     admin_user.password = 'emert.ai'  # This will trigger password hashing in User model
                     db.session.commit()
                 
                 # Log the admin in directly
-                login_user(admin_user, remember=True)
-                flash('Admin login successful (bypass).', 'success')
+                login_user(admin_user, remember=remember_me)
+                flash('Admin login successful.', 'success')
                 next_page = request.args.get('next')
                 if next_page:
                     return redirect(next_page)
                 return redirect(url_for('dashboard.index'))
             except Exception as e:
-                # Fix 3: Handle admin creation/update errors gracefully
+                # Handle admin creation/update errors gracefully
                 db.session.rollback()
-                flash('An error occurred during admin login. Please try again.', 'error')
+                flash('An error occurred during login. Please try again.', 'error')
                 return render_template('auth/login.html')
-        # --- END ADMIN LOGIN BYPASS BLOCK ---
-
-        # Validate form data
-        if not username or not password:
-            flash('Please provide both username and password.', 'error')
-            return render_template('auth/login.html')
-
-        # Find user by username or email
-        user = User.get_by_username(username) or User.get_by_email(username)
-
-        if user and user.check_password(password):
-            login_user(user, remember=remember_me)
-            flash(f'Welcome back, {user.username}!', 'success')
-            # Redirect to next page if specified, otherwise to dashboard
-            next_page = request.args.get('next')
-            if next_page:
-                return redirect(next_page)
-            return redirect(url_for('dashboard.index'))
         else:
-            flash('Invalid username or password. Please try again.', 'error')
+            # Any other password is rejected
+            flash('Invalid password. Access denied.', 'error')
 
     return render_template('auth/login.html')
 
@@ -135,7 +119,7 @@ def register():
             return redirect(url_for('auth.login'))
 
         except IntegrityError as e:
-            # Fix 4: Handle database integrity errors (duplicate entries) gracefully
+            # Handle database integrity errors (duplicate entries) gracefully
             db.session.rollback()
             if 'username' in str(e).lower():
                 flash('Username already exists. Please choose a different one.', 'error')
@@ -145,7 +129,7 @@ def register():
                 flash('Registration failed due to duplicate information. Please try again.', 'error')
             return render_template('auth/register.html', form=form)
         except Exception as e:
-            # Fix 5: Handle other database errors gracefully
+            # Handle other database errors gracefully
             db.session.rollback()
             flash('An error occurred during registration. Please try again.', 'error')
             return render_template('auth/register.html', form=form)
