@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Welcome - 1K A Day System{% endblock %}
+
 {% block content %}
 <div class="jumbotron bg-primary text-white text-center py-5 mb-4">
     <div class="container">
@@ -7,6 +8,7 @@
         <p class="lead">Track your daily income and reach your financial goals</p>
     </div>
 </div>
+
 <div class="container">
     <div class="row">
         <div class="col-md-8 mx-auto">
@@ -15,12 +17,12 @@
                     <h2 class="card-title mb-4">Quick Links</h2>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg btn-block">
+                            <a href="{{ url_for('dashboard.home') }}" class="btn btn-primary btn-lg btn-block">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <a href="{{ url_for('main.income_tracker') }}" class="btn btn-success btn-lg btn-block">
+                            <a href="{{ url_for('income.index') }}" class="btn btn-success btn-lg btn-block">
                                 <i class="fas fa-chart-line"></i> Track Income
                             </a>
                         </div>
